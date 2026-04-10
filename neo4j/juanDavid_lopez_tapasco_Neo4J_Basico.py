@@ -167,3 +167,72 @@ queries = {
         """,
 
 }
+
+"Queries emails"
+queries_opcionales = { 
+    "opcional1": 
+        """
+        
+        MATCH (u:User)-[r:WROTE_TO]->(u)
+        WHERE COUNT { (u)-[:WROTE_TO]->() } = 1
+        RETURN u
+        
+        """,
+    "opcional2": 
+        """
+        
+        MATCH (u:User)
+        RETURN u.department AS Departamento, count(u) AS TotalUsuarios
+        ORDER BY TotalUsuarios DESC
+        
+        """,
+    "opcional3": 
+        """
+        
+        MATCH (u:User)<-[r:WROTE_TO]-(sender:User)
+        RETURN u.id AS Usuario, count(r) AS MensajesRecibidos
+        ORDER BY MensajesRecibidos DESC
+        
+    """
+}
+"Queries extra peliculas"
+queries_extra = {
+    "1. Muestra todos los actores que actuaron en películas, los productores de esas películas y sus directores. Muestra el título de cada una de las películas, junto con la lista de actores de cada película, la lista de productores y la lista de los directores. Si no tuviesen actores, directores o productores, la película debe aparecer también. No se deben mostrar datos repetidos. Ordena los resultados según el tamaño de la lista de actores (puedes utilizar la función de SIZE).": """
+        MATCH (m:Movie)
+        OPTIONAL MATCH (a:Person)-[:ACTED_IN]->(m)
+        OPTIONAL MATCH (p:Person)-[:PRODUCED]->(m)
+        OPTIONAL MATCH (d:Person)-[:DIRECTED]->(m)
+        WITH m, collect(DISTINCT a.name) AS actores, collect(DISTINCT p.name) AS productores, collect(DISTINCT d.name) AS directores
+        RETURN m.title, actores, productores, directores
+        ORDER BY size(actores) DESC
+    """,
+    
+    "2. Para el nodo de nombre \"Paul Blythe\", muestra si tiene una relación de tipo FOLLOWS en cualquier dirección con exactamente 3 saltos. Muestra tanto el nodo de Paul Blythe como el otro nodo situado a 3 saltos (si lo hubiera).": """
+        MATCH (paul:Person {name: 'Paul Blythe'})-[:FOLLOWS*3]-(otro)
+        RETURN paul, otro
+    """,
+    
+    "3. Muestra el nombre de las las películas que tienen al menos 2 directores. Muestra los nombres de las personas que las han puntuado (si no hubiera nadie que la haya puntuado, muéstrala igualmente).": """
+        MATCH (d:Person)-[:DIRECTED]->(m:Movie)
+        WITH m, count(d) AS num_directores
+        WHERE num_directores >= 2
+        OPTIONAL MATCH (reviewer:Person)-[:REVIEWED]->(m)
+        RETURN m.title, collect(DISTINCT reviewer.name) AS personas_puntuaron
+    """,
+    
+    "4. Muestra los actores que han participado en menos de 4 películas. Muestra el nombre y el título de dichas películas en formato de lista.": """
+        MATCH (actor:Person)-[:ACTED_IN]->(peli:Movie)
+        WITH actor, count(peli) AS num_pelis, collect(peli.title) AS lista_peliculas
+        WHERE num_pelis < 4
+        RETURN actor.name, lista_peliculas
+    """,
+    
+    "5. Recupera todas aquellas películas en las que hay al menos 2 personas distintas que han interactuado con dicha película de al menos 2 formas distintas. Muestra la película y las personas involucradas. Es decir, para cada película, debe haber al menos 2 personas relacionadas con esa película y cada una de esas personas deben estar relacionadas con la película de dos formas distintas.": """
+        MATCH (persona:Person)-[r]->(pelicula:Movie)
+        WITH pelicula, persona, count(DISTINCT type(r)) AS tipos_relacion
+        WHERE tipos_relacion >= 2
+        WITH pelicula, collect(persona) AS personas_involucradas
+        WHERE size(personas_involucradas) >= 2
+        RETURN pelicula, personas_involucradas
+    """
+}
