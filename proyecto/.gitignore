@@ -1,0 +1,19 @@
+configuracion.py
+
+# Ignore virtual env and editor settings
+venv/
+.vscode/
+
+# Ignore cache folders
+__pycache__/
+_pycache__/
+
+# Ignore data folders and all contents
+datos/
+datos/**
+datasets/
+datasets/**
+
+# Ignore generated data files
+*.json
+*.csv
